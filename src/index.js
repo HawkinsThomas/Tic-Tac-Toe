@@ -43,33 +43,8 @@ class Board extends React.Component {
 }
 
 class Game extends React.Component {
-  constructor(props){
-    super(props);
-    this.state = {
-      history: [{
-        squares: Array(9).fill(null)
-      }],
-      stepNumber: 0,
-      XisNext: true,
-    };
-  }
 
-  handleClick(i){
-    const history = this.state.history.slice(0, this.state.stepNumber + 1);
-    const current = history[this.state.stepNumber];
-    const squares = current.squares.slice();
-    if (!squares[i] && !calculateWinner(squares)){
-      squares[i]= this.state.XisNext ? 'X' : 'O';
-      this.setState({
-        history: history.concat([{
-          squares: squares,
-        }]),
-        XisNext: !this.state.XisNext,
-        stepNumber: history.length,
-      });
-    }
-  }
-
+  
   jumpTo(step){
     this.setState({
       stepNumber: step,
@@ -103,6 +78,7 @@ class Game extends React.Component {
 
     return (
       <div className="game">
+       <button onClick={this.props.delete}>Delete</button>
         <div className="game-board">
           <Board 
             squares={current.squares}
@@ -118,11 +94,14 @@ class Game extends React.Component {
   }
 }
 
+//Arena Class holds all existing games and their state
+
 class Arena extends React.Component {
   constructor(props) {
     super(props); 
     this.state = {
       games: [],
+      gameCounter: 0,
     };
   }
   deleteAllGames() {
@@ -130,16 +109,54 @@ class Arena extends React.Component {
       games:[],
     })
   }
+
+  deleteGame(gameKey) {
+    this.setState({
+      games: this.state.games
+        .filter((game) => {
+          //console.log(game, gameKey + 1, game!==(gameKey + 1));
+          return game.gameKey!==(gameKey);
+        })
+    });
+    
+  }
   createNewGame() {
     this.setState({
-      games: this.state.games.concat(this.state.games.length + 1),
-    })
+      gameCounter: this.state.gameCounter + 1,
+      games: this.state.games.concat(
+        {
+          history: [{
+            squares: Array(9).fill(null)
+          }],
+          stepNumber: 0,
+          XisNext: true,
+          gameKey: this.state.gameCounter,
+        },)
+    });
+  }
+
+  handleClick(i, gameKey){
+    const history = this.state.games[gameKey].history.slice(0, this.state.stepNumber + 1);
+    const current = history[this.state.games[gameKey].stepNumber];
+    const squares = current.squares.slice();
+    if (!squares[i] && !calculateWinner(squares)){
+      squares[i]= this.state.XisNext ? 'X' : 'O';
+      this.setState({
+        games:
+          
+          history: history.concat([{
+            squares: squares,
+          }]),
+          XisNext: !this.state.XisNext,
+          stepNumber: history.length,
+      });
+    }
   }
 
   render() {
-    const games = this.state.games.map((game, gameKey) => {
+    const games = this.state.games.map((game) => {
       return(
-        <Game key={gameKey}></Game>
+        <Game key={this.state.games.gameKey} delete={() => {this.deleteGame(this.state.games.gameKey)}}></Game>
       );
     }); 
     return(
