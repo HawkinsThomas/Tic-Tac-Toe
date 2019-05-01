@@ -75,7 +75,6 @@ class Game extends React.Component {
       stepNumber: step,
       XisNext: (step % 2) === 0,
     });
-    //this.setState({ current: this.state.history[move - 1] })
   }
 
   render() {
@@ -126,10 +125,14 @@ class Arena extends React.Component {
       games: [],
     };
   }
-
-  createNewGame(i) {
+  deleteAllGames() {
     this.setState({
-      games: this.state.games.concat(i),
+      games:[],
+    })
+  }
+  createNewGame() {
+    this.setState({
+      games: this.state.games.concat(this.state.games.length + 1),
     })
   }
 
@@ -142,7 +145,8 @@ class Arena extends React.Component {
     return(
       <div>
         <div>
-          <button onClick= {() => this.createNewGame()}>Create New Game</button>
+          <button onClick={() => this.createNewGame()}>Create New Game</button>
+          <button onClick={() => this.deleteAllGames()}>Clear</button>
         </div>
         <div>
           {games}
